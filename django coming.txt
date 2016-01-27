@@ -1,0 +1,16 @@
+virtualenv environment_name
+environment_name\scripts\activate    --to activate environment--
+python manage.py startproject project_name
+python manage.py runserver <Machine ip address>: portname
+python manage.py startapp app_name
+Each view exists within the views.py file 
+as a series of individual functions.
+Each view takes at least one argument - a HttpRequest object which lies in django.http module
+each view must return a HttpResponse object
+HttpResponse take a string parameter represent content of page the client requested for.
+To create URL mapping , we use a tuple. For Django to pick your mappings up, this tuple must be called urlpatterns.
+The urlpatterns tuple contains a series of calls to the django.conf.urls.url() function, with each call handling 
+a unique mapping. 
+name parameter is optional  provided by Django to allow you to distinguish one mapping from another.
+A separate urls.py file for each application allows you to set URLs for individual applications. With minimal 
+coupling, you can then join them up to your project’s master urls.py file later.

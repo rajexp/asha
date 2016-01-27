@@ -1,0 +1,19 @@
+{% extends 'asha/base.html' %}
+{% load static %}
+{%block title%}About{% endblock %}
+{% block body_block %}
+<div class="hero-unit">
+    <h1>About Asha</h1>
+
+    You've visited the site on <strong>{{ visits }} occasion(s)</strong>.<br />
+    <br />
+    <p>This site has been created as a hobby project in Django. I have been working in python for almost an year but haven't
+      tried my hands on Django yet.
+    This is my second attempt on Django under the tutorial TangowithDjango. Hopefully i have done the project successfully.
+    Surely there is much work to be done on site to make it as a library of useful links. Thanks for visiting.<br>
+    I have a blog here <a href="www.pythoninteractive.blogspot.in">Interactive Python</a> where  ocassionaly write about python for novice programmers.
+  </p>
+
+</div>
+<div class="circular"></div>
+{% endblock %}
