@@ -5,22 +5,58 @@
         <div class="hero-unit">
         {% if category %}
           <h1>{{ category_name }}</h1>
+          <p>
+            <b id="like_count">{{ category.likes }}</b> people like this category
+
+            {% if user.is_authenticated %}
+            <button id ="likes" data-catid="{{category.id}}" class="btn btn-mini btn-primary" type="button">Like</button>
+            {% endif %}
+          </p>
+          <hr>
               {% if pages %}
               <ul>
-                  {% for page in pages %}
-                  <li><a href="{{ page.url }}">{{ page.title }}</a></li>
+                {% for page in pages %}
+                <li>
+                  <a href="/asha/goto/?page_id={{page.id}}">{{page.title}}</a>
+                    {% if page.views > 1 %}
+                    - ({{ page.views }} views)
+                    {% elif page.views == 1 %}
+                    - ({{ page.views }} view)
+                    {% endif %}
+                  </li>
                   {% endfor %}
-              </ul>
-              {% else %}
-                  <strong>No pages currently in category.</strong>
-              {% endif %}
+                </ul>
+                {% else %}
+                <strong>No pages currently in category.</strong><br/>
+                {% endif %}
           {% if user.is_authenticated %}
-
           <br>
           <a href="/asha/category/{{ category_name_url }}/add_page/">Add page to this Category</a>
           {% endif %}
           {% else %}
               The specified category {{ category_name }} does not exist!
           {% endif %}
+        </div>
+        <div class="container-fluid">
+          <p>Search for a page.</p>
+          <form class="span8 form-search" id="search_form" method="post" action="/asha/category/{{ category_name_url }}/">
+            {% csrf_token %}
+              <input type="text" class="input-long search-query"  name="query" placeholder="{{ category_name }}" id="query" />
+              <button type="submit" class="btn btn-success" name="submit" value="Search">Search</button>
+          </form>
+
+            {% if result_list %}
+            <!-- Display search results in an ordered list -->
+            <div style="clear: both;">
+                <ol>
+                {% for result in result_list %}
+                    <li>
+                        <strong><a href="{{ result.link }}">{{ result.title }}</a></strong><br />
+                        <em>{{ result.summary }}</em>
+                    </li>
+                {% endfor %}
+                </ol>
+            </div>
+            {% endif %}
         </div>
 {% endblock %}

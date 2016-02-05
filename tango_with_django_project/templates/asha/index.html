@@ -14,9 +14,9 @@
   <div class="span6">
   <h1>Top 5 Categories </h1>
 
-  {% if categories %}
+  {% if topcategories %}
       <ul>
-          {% for category in categories %}
+          {% for category in topcategories %}
           <!-- Following line changed to add an HTML hyperlink -->
           <li><a href="/asha/category/{{ category.url }}">{{ category.name }}</a></li>
           {% endfor %}
@@ -29,14 +29,20 @@
  <h1>Top 5 Pages</h1>
  {% if pages %}
  <ol>
-        {% for page in pages %}
-
-            <li><a href="{{ page.url}}">{{ page.title }}</a> - {{ page.category }} ({{ page.views }} view(s))</li>
-          {% endfor %}
- </ol>
- {% else %}
- <strong> Sorry No pages to show. </strong>
- {% endif %}
+   {% for page in pages %}
+   <li>
+     <a href="/asha/goto/?page_id={{page.id}}">{{page.title}}</a>
+       {% if page.views > 1 %}
+       - ({{ page.views }} views)
+       {% elif page.views == 1 %}
+       - ({{ page.views }} view)
+       {% endif %}
+     </li>
+     {% endfor %}
+   </ol>
+   {% else %}
+   <strong>No pages currently in category.</strong><br/>
+   {% endif %}
  </div>
  </div>
 {% endblock %}

@@ -63,3 +63,4 @@ def run_query(search_terms):
 
     # Return the list of results to the calling function.
     return results
+run_query("python")

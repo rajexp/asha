@@ -4,6 +4,8 @@
     <head>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <!-- Bootstrap -->
+   <script src="{% static "/js/jquery.js" %}"></script>
+<script src="{% static "/js/asha-ajax.js" %}"></script>
    <link href="{% static 'css/bootstrap-fluid-adj.css' %}" rel="stylesheet">
    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" media="screen">
    <link href="{% static 'css/bootstrap-responsive.css' %}" rel="stylesheet">
@@ -42,12 +44,12 @@ padding: 9px 0;
              <ul class="nav pull-right">
           {% if user.is_authenticated %}
               <li class="navbar-text">Welcome, {{ user.username }}!</li>
+              <li><a href="/asha/profile">Profile</a></li>
               <li><a href="/asha/logout/">Logout</a></li>
           {% else %}
               <li><a href="/asha/register/">Register Here</a></li>
               <li><a href="/asha/login/">Login</a></li>
           {% endif %}
-          <li><a href="/asha/search/">Search Here</a></li>
         </ul>
           <ul class="nav">
                  {% if user.is_authenticated %}
@@ -64,10 +66,27 @@ padding: 9px 0;
      <hr />
      <div class="container-fluid">
          <div class="row-fluid">
+
              <div class="span3">
+               <div class="span9"><ul class="nav nav-list">
+                    <li class="nav-header">Find a Category</li>
+                    <form>
+                    <label></label>
+                    <li><input  class="search-query span10" type="text" name="suggestion" value="" id="suggestion" /></li>
+                    </form>
+            </ul>
+            {% if cat_list %}
+            <div id="cats">
+            {% include 'asha/category_list.html' with cat_list=cat_list %}
+            </div>
+            {% endif %}
+          </div>
                  <div class="well sidebar-nav">
-                     <!--- Empty for the timebeing -->
+                   {% if not topcategories%}
+                   {% include "asha/category_list.html" %}
+                   {% endif %}
                  </div>
+
                  <!--/.well -->
              </div>
              <!--/span-->

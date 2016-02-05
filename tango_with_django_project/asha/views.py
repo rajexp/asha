@@ -1,12 +1,14 @@
 from django.http import HttpResponse,HttpResponseRedirect
 from django.template import RequestContext
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response , redirect
 from asha.models import Category,Page
+from django.contrib.auth.models import User
 from asha.forms import CategoryForm,PageForm,UserForm, UserProfileForm
 from django.contrib.auth import authenticate, login , logout
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
 from asha.search import run_query
+
 @login_required
 def restricted(request):
     return HttpResponse("Since you're logged in, you can see this text!")
@@ -14,16 +16,6 @@ def restricted(request):
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect('/asha/')
-def search(request):
-    context = RequestContext(request)
-    result_list = []
-    if request.method == 'POST':
-        query = request.POST['query'].strip()
-
-        if query:
-            result_list = run_query(query)
-
-    return render_to_response('asha/search.html', {'result_list': result_list}, context)
 def register(request):
     if request.session.test_cookie_worked():
         print ">>>> TEST COOKIE WORKED!"
@@ -93,16 +85,53 @@ def user_login(request):
         # No context variables to pass to the template system, hence the
         # blank dictionary object...
         return render_to_response('asha/login.html', {}, context)
+def get_category_list(max_results=0, starts_with=''):
+        cat_list = []
+        if starts_with:
+            cat_list = Category.objects.filter(name__istartswith=starts_with)
+        else:
+            cat_list = Category.objects.all()
+        if max_results > 0:
+            if len(cat_list) > max_results:
+                cat_list = cat_list[:max_results]
+        for cat in cat_list:
+            cat.url = encode_url(cat.name)
+        return cat_list
+def suggest_category(request):
+        context = RequestContext(request)
+        cat_list = []
+        starts_with = ''
+        if request.method == 'GET':
+            starts_with = request.GET['suggestion']
+        cat_list = get_category_list(8, starts_with)
+        return render_to_response('asha/category_list.html', {'cat_list': cat_list }, context)
+def getallcategories():
+    category_list=Category.objects.order_by('-likes')[:]
+    for category in category_list:
+        category.url=category.name.replace(' ','_')
+    return category_list
+
+@login_required
+def like_category(request):
+    context = RequestContext(request)
+    cat_id = None
+    if request.method == 'GET':
+        cat_id = request.GET['category_id']
+    likes = 0
+    if cat_id:
+        category = Category.objects.get(id=int(cat_id))
+        if category:
+            likes = category.likes + 1
+    category.likes =  likes
+    category.save()
+    return HttpResponse(likes)
 
 def index(request):
     request.session.set_test_cookie()
     context=RequestContext(request)
     page_list=Page.objects.order_by('-views')[:5]
     context_dict={'pages':page_list}
-    category_list=Category.objects.order_by('-likes')[:5]
-    context_dict['categories']=category_list
-    for category in category_list:
-        category.url=category.name.replace(' ','_')
+    context_dict['topcategories']=getallcategories()[:5]
     if request.session.get('last_visit'):
         # The session has a value for the last visit
         last_visit_time = request.session.get('last_visit')
@@ -138,20 +167,30 @@ def about(request):
     else:
         count = 0
     return render_to_response('asha/about.html', {'visits': count}, context)
+#search method
+
+   
 def category(request,category_name_url):
     context=RequestContext(request)
     # URLs don't handle spaces well, so we encode them as underscores.
     # We can then simply replace the underscores with spaces again to get the name.
+    
     category_name=category_name_url.replace('_',' ')
     context_dict={'category_name':category_name}
     context_dict["category_name_url"]=category_name_url
+    context_dict['categories']=getallcategories()
     try:
         category=Category.objects.get(name=category_name)
-        pages=Page.objects.filter(category=category)
+        pages=Page.objects.filter(category=category).order_by('-views')
         context_dict["pages"]=pages
         context_dict["category"]=category
     except Category.DoesNotExist:
         pass
+    if request.method == 'POST':
+        query = request.POST['query'].strip()
+        if query:
+            result_list = run_query(query)
+            context_dict['result_list'] = result_list
     return render_to_response('asha/category.html',context_dict,context)
 def decode_url(url):
     return url.replace('_',' ')
@@ -171,6 +210,39 @@ def add_category(request):
         # If the request was not a POST, display the form to enter details.
         form = CategoryForm()
     return render_to_response('asha/add_category.html', {'form': form}, context)
+
+def track_url(request):
+    context = RequestContext(request)
+    page_id = None
+    url     = '/asha/'
+    if request.method == 'GET':
+        if 'page_id' in request.GET:
+            page_id=request.GET['page_id']
+            try:
+                page = Page.objects.get(id=page_id)
+                page.views = page.views +1
+                page.save()
+                url = page.url
+            except:
+                pass
+    return redirect(url)
+@login_required
+def profile(request):
+    context = RequestContext(request)
+    cat_list = getallcategories()
+    context_dict = {'cat_list': cat_list}
+    u = User.objects.get(username=request.user)
+
+    try:
+        up = UserProfile.objects.get(user=u)
+    except:
+        up = None
+
+    context_dict['user'] = u
+    context_dict['userprofile'] = up
+    return render_to_response('asha/profile.html', context_dict, context)
+    
+    
 
 def add_page(request,category_name_url):
     context=RequestContext(request)

@@ -1,0 +1,14 @@
+{% if categories %}
+<h1>Categories </h1>
+{% if categories %}
+
+    <ul>
+        {% for category in categories %}
+        <!-- Following line changed to add an HTML hyperlink -->
+        <li><a href="/asha/category/{{ category.url }}">{{ category.name }}</a></li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <strong>There are no categories present.</strong>
+{% endif %}
+{% endif %}
