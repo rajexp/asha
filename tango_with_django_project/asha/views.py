@@ -85,30 +85,39 @@ def user_login(request):
         # No context variables to pass to the template system, hence the
         # blank dictionary object...
         return render_to_response('asha/login.html', {}, context)
+def dedication(request):
+    context=RequestContext(request)
+    return render_to_response('asha/dedication.html',{},context)
+def encode_url(url):
+    url=url.replace(' ','_')
+    return url
 def get_category_list(max_results=0, starts_with=''):
-        cat_list = []
-        if starts_with:
-            cat_list = Category.objects.filter(name__istartswith=starts_with)
-        else:
-            cat_list = Category.objects.all()
-        if max_results > 0:
-            if len(cat_list) > max_results:
-                cat_list = cat_list[:max_results]
-        for cat in cat_list:
-            cat.url = encode_url(cat.name)
-        return cat_list
+    cat_list = []
+    if starts_with:
+        cat_list = Category.objects.filter(name__istartswith=starts_with)
+    else:
+        cat_list = Category.objects.all()
+    if max_results > 0:
+        if len(cat_list) > max_results:
+            cat_list = cat_list[:max_results]
+    for cat in cat_list:
+        cat.url = encode_url(cat.name)
+    return cat_list
 def suggest_category(request):
-        context = RequestContext(request)
-        cat_list = []
-        starts_with = ''
-        if request.method == 'GET':
-            starts_with = request.GET['suggestion']
-        cat_list = get_category_list(8, starts_with)
-        return render_to_response('asha/category_list.html', {'cat_list': cat_list }, context)
+    context = RequestContext(request)
+    cat_list = []
+    starts_with = ''
+    if request.method == 'GET':
+        starts_with = request.GET['suggestion']
+        print(starts_with)
+    cat_list = get_category_list(5, starts_with)
+    context_dict={'categories': cat_list }
+    #print(cat_list)
+    return render_to_response('asha/category_list.html',context_dict, context)
 def getallcategories():
     category_list=Category.objects.order_by('-likes')[:]
     for category in category_list:
-        category.url=category.name.replace(' ','_')
+        category.url=encode_url(category.name)
     return category_list
 
 @login_required
@@ -122,8 +131,8 @@ def like_category(request):
         category = Category.objects.get(id=int(cat_id))
         if category:
             likes = category.likes + 1
-    category.likes =  likes
-    category.save()
+            category.likes =  likes
+            category.save()
     return HttpResponse(likes)
 
 def index(request):
@@ -161,12 +170,13 @@ def index(request):
 
 def about(request):
     context=RequestContext(request)
-    context_dict={}
+    context_dict={'otherpages':'about'}
     if request.session.get('visits'):
         count = request.session.get('visits')
     else:
         count = 0
-    return render_to_response('asha/about.html', {'visits': count}, context)
+    context_dict['visits']=count
+    return render_to_response('asha/about.html',context_dict, context)
 #search method
 
    

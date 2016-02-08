@@ -4,16 +4,13 @@ import os
 SETTING_DIR=os.path.dirname(__file__)
 PROJECT_PATH=os.path.join(SETTING_DIR,os.pardir)
 PROJECT_PATH=os.path.abspath(PROJECT_PATH)
-STATIC_PATH= os.path.join(PROJECT_PATH,'static')
 TEMPLATE_PATH=os.path.join(PROJECT_PATH,'templates')
 DATABASE_PATH=os.path.join(PROJECT_PATH,'asha.db')
-MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(PROJECT_PATH, 'media')
+MEDIA_URL = '/media/'
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 SESSION_EXPIRE_AT_BROWSER_CLOSE=True
-#Redirect Non login User
-LOGIN_URL = '/asha/login/'
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -65,7 +62,7 @@ USE_TZ = True
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/var/www/example.com/static/"
-STATIC_ROOT = ''
+STATIC_PATH= os.path.join(PROJECT_PATH,'static')
 
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
@@ -121,6 +118,7 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    #not added so that social auth works
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -132,8 +130,26 @@ INSTALLED_APPS = (
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'asha',
+    
+    #'social_auth',
 )
-
+#Redirect Non login User
+LOGIN_URL = '/asha/login/'
+LOGIN_REDIRECT_URL='/asha/'
+AUTHENTICATION_BACKENDS = (
+    'social_auth.backends.twitter.TwitterBackend',
+    'social_auth.backends.facebook.FacebookBackend',
+    'social_auth.backends.google.GoogleOAuthBackend',
+    'social_auth.backends.google.GoogleOAuth2Backend',
+    'social_auth.backends.google.GoogleBackend',
+    'social_auth.backends.yahoo.YahooBackend',
+    'social_auth.backends.contrib.linkedin.LinkedinBackend',
+    'social_auth.backends.contrib.disqus.DisqusBackend',
+    'social_auth.backends.contrib.github.GithubBackend',
+    'social_auth.backends.contrib.live.LiveBackend',
+    'social_auth.backends.contrib.yahoo.YahooOAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
 # A sample logging configuration. The only tangible logging

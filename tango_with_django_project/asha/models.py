@@ -16,7 +16,7 @@ class Page(models.Model):
     def __unicode__(self):
         return self.title
 class UserProfile(models.Model):
-    user=models.OneToOneField(User)
+    user = models.ForeignKey(User)
     website=models.URLField(blank=True)
     picture=models.ImageField(upload_to='profile_image',blank=True)
     
